@@ -60,27 +60,6 @@ if [[ ! -f "$ERROR_FILE" ]]; then
     echo "0" > "$ERROR_FILE"
 fi
 
-# Verifikasi lisensi
-if ! is_license_valid; then
-    ERROR_COUNT=$(cat "$ERROR_FILE")
-    ERROR_COUNT=$((ERROR_COUNT + 1))
-    echo "$ERROR_COUNT" > "$ERROR_FILE"
-    if [[ $ERROR_COUNT -ge 3 ]]; then
-        echo -e "\033[31mLisensi tidak valid atau belum dimasukkan! Anda telah gagal 3 kali. Anda akan logout.\033[0m"
-        for i in 3 2 1; do
-            echo "$i"
-            sleep 1
-        done
-        logout
-        exit
-    else
-        echo -e "\033[31mLisensi tidak valid atau belum dimasukkan! Anda telah salah $ERROR_COUNT kali. Sisa $(($ERROR_COUNT)) kali lagi.\033[0m"
-    fi
-else
-    # Reset error count jika lisensi valid
-    echo "0" > "$ERROR_FILE"
-fi
-
 # Tambahkan lisensi jika belum ada dan berikan informasi
 if [[ ! -f "$LICENSE_FILE" ]]; then
     echo "$VALID_LICENSE" > "$LICENSE_FILE"
