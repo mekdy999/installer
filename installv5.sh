@@ -29,17 +29,6 @@ function is_ip_allowed() {
     return 1
 }
 
-# Fungsi untuk memeriksa lisensi
-function is_license_valid() {
-    if [[ -f "$LICENSE_FILE" ]]; then
-        LICENSE_CONTENT=$(cat "$LICENSE_FILE")
-        if [[ "$LICENSE_CONTENT" == "$VALID_LICENSE" ]]; then
-            return 0
-        fi
-    fi
-    return 1
-}
-
 # Verifikasi alamat IP
 if ! is_ip_allowed "$CURRENT_IP"; then
     echo -e "${GREEN}Buy dulu Gih Ke BarModss${RESET}"
