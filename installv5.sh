@@ -1,14 +1,5 @@
 #!/bin/bash
 
-# Daftar alamat IP yang diizinkan
-ALLOWED_IPS=(
-    "143.198.22.124"
-    "174.138.68.125"
-    "143.198.137.124"
-    
-)
-
-
 # Tentukan lisensi yang valid
 VALID_LICENSE="Barkece"
 
@@ -16,37 +7,40 @@ VALID_LICENSE="Barkece"
 LICENSE_FILE="/var/www/pterodactyl/license.txt"
 ERROR_FILE="/var/www/pterodactyl/error_count.txt"
 
-# Ambil alamat IP saat ini
-CURRENT_IP=$(hostname -I | awk '{print $1}')
-
-# Fungsi untuk memeriksa apakah IP diizinkan
-function is_ip_allowed() {
-    local ip=$1
-    for allowed_ip in "${ALLOWED_IPS[@]}"; do
-        if [[ "$ip" == "$allowed_ip" ]]; then
+# Fungsi untuk memeriksa lisensi
+function is_license_valid() {
+    if [[ -f "$LICENSE_FILE" ]]; then
+        LICENSE_CONTENT=$(cat "$LICENSE_FILE")
+        if [[ "$LICENSE_CONTENT" == "$VALID_LICENSE" ]]; then
             return 0
         fi
-    done
+    fi
     return 1
 }
 
-# Verifikasi alamat IP
-if ! is_ip_allowed "$CURRENT_IP"; then
-    echo -e "${GREEN}Buy dulu Gih Ke BarModss${RESET}"
-    echo -e "${YELLOW}WHATSAPP : 6282241360392${RESET}"
-    echo -e "${YELLOW}HARGA TOKEN : 30K FREE UPDATE JIKA ADA TOKEN BARU${RESET}"
-    echo -e "${YELLOW}©BarModss${RESET}"
-    echo -e "${RED}KAMU TIDAK DIBERI AKSES!! ANDA AKAN LOGOUT DALAM${RESET}"
-    for i in 3 2 1; do
-        echo "$i"
-        sleep 1
-    done
-    logout  # Logout dari VPS
-    exit
-fi
-
 # Inisialisasi file kesalahan jika tidak ada
 if [[ ! -f "$ERROR_FILE" ]]; then
+    echo "0" > "$ERROR_FILE"
+fi
+
+# Verifikasi lisensi
+if ! is_license_valid; then
+    ERROR_COUNT=$(cat "$ERROR_FILE")
+    ERROR_COUNT=$((ERROR_COUNT + 1))
+    echo "$ERROR_COUNT" > "$ERROR_FILE"
+    if [[ $ERROR_COUNT -ge 3 ]]; then
+        echo -e "\033[31mLisensi tidak valid atau belum dimasukkan! Anda telah gagal 3 kali. Anda akan logout.\033[0m"
+        for i in 3 2 1; do
+            echo "$i"
+            sleep 1
+        done
+        logout
+        exit
+    else
+        echo -e "\033[31mLisensi tidak valid atau belum dimasukkan! Anda telah salah $ERROR_COUNT kali. Sisa $(($ERROR_COUNT)) kali lagi.\033[0m"
+    fi
+else
+    # Reset error count jika lisensi valid
     echo "0" > "$ERROR_FILE"
 fi
 
